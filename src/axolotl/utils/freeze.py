@@ -99,7 +99,7 @@ def _invert_ranges(
 
 
 def _merge_ranges(
-    given_ranges: List[Tuple[int, int | None]], layer_size: int
+    given_ranges: List[Tuple[int, int]], layer_size: int
 ) -> List[Tuple[int, int]]:
     """
     Merges overlapping ranges and sorts the given ranges.

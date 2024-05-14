@@ -308,6 +308,9 @@ def load_tokenized_prepared_datasets(
                         streaming=False,
                         split=None,
                     )
+                    
+                    LOG.info(f"Loaded dataset from local path: {config_dataset.path}")
+                    LOG.info(f"Dataset: {ds['train'][0]}")
                 else:
                     raise ValueError(
                         "unhandled dataset load: local path exists, but is neither a directory or a file"
@@ -374,6 +377,7 @@ def load_tokenized_prepared_datasets(
                     streaming=False,
                     split=None,
                 )
+                
             if not ds:
                 raise ValueError("unhandled dataset load")
 
@@ -430,7 +434,7 @@ def load_tokenized_prepared_datasets(
                 dataset.push_to_hub(
                     f"{cfg.push_dataset_to_hub}/{ds_hash}", private=True
                 )
-
+                
     return dataset, prompters
 
 
@@ -503,13 +507,21 @@ def load_prepare_datasets(
         )
 
         train_dataset = dataset["train"]
+        LOG.info(f"train dataset: {train_dataset[0]}")
+        
         eval_dataset = dataset["test"]
+        LOG.info(f"train dataset: {eval_dataset[0]}")
+        
     elif split == "test":
         train_dataset = None
         eval_dataset = dataset
+        
+        LOG.info(f"train dataset: {eval_dataset[0]}")
     else:
         train_dataset = dataset
         eval_dataset = None
+        
+        LOG.info(f"train dataset: {train_dataset[0]}")
 
     return train_dataset, eval_dataset, prompters
 

@@ -6,7 +6,7 @@ services:
       dockerfile: ./docker/Dockerfile
     volumes:
       - .:/workspace/axolotl
-      - ~/.cache/huggingface/:/root/.cache/huggingface/
+      - /models/huggingface/:/root/.cache/huggingface/ # cache huggingface models
     # set environment variables
     environment:
       # Set environment variables
@@ -15,6 +15,7 @@ services:
       - GIT_COMMITTER_NAME=${GIT_COMMITTER_NAME}
       - GIT_COMMITTER_EMAIL=${GIT_COMMITTER_EMAIL}
       - WANDB_API_KEY=${WANDB_API_KEY}
+      
     deploy:
       resources:
         reservations:

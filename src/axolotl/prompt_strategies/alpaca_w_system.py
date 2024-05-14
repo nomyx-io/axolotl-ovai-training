@@ -37,6 +37,9 @@ class InstructionWSystemPromptTokenizingStrategy(PromptTokenizingStrategy):
                 )
             )
         )
+        
+        print(user_prompt)
+        
         tokenized_prompt = self._tokenize(user_prompt, add_eos_token=False)
         if not self.train_on_inputs:
             user_prompt_len = len(tokenized_prompt["input_ids"])
@@ -45,6 +48,7 @@ class InstructionWSystemPromptTokenizingStrategy(PromptTokenizingStrategy):
         tokenized_res_prompt = self._tokenize(
             response, strip_bos_token=True, add_eos_token=True
         )
+                
         tokenized_prompt["input_ids"] += tokenized_res_prompt["input_ids"]
         tokenized_prompt["attention_mask"] += tokenized_res_prompt["attention_mask"]
         tokenized_prompt["labels"] += tokenized_res_prompt["input_ids"]
@@ -83,6 +87,7 @@ class SystemDataPrompter(AlpacaPrompter):
             )
         if output:
             res = f"{res}{output}"
+        
         yield res
 
 
