@@ -2,6 +2,8 @@
 configs
 last_run_prepared/
 .vscode
+data/
+outputs/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
