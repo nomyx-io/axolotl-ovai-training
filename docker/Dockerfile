@@ -18,10 +18,11 @@ WORKDIR /workspace/axolotl
 # pip install torch==2.1.2 torchvision==0.16.2 --index-url https://download.pytorch.org/whl/cu118
 
 # If AXOLOTL_EXTRAS is set, append it in brackets
+RUN pip install causal_conv1d
 RUN if [ "$AXOLOTL_EXTRAS" != "" ] ; then \
-        pip install -e .[deepspeed,flash-attn,mamba-ssm,$AXOLOTL_EXTRAS] $AXOLOTL_ARGS; \
+        pip install -e .[deepspeed,flash-attn,mamba-ssm,galore,$AXOLOTL_EXTRAS] $AXOLOTL_ARGS; \
     else \
-        pip install -e .[deepspeed,flash-attn,mamba-ssm] $AXOLOTL_ARGS; \
+        pip install -e .[deepspeed,flash-attn,mamba-ssm,galore] $AXOLOTL_ARGS; \
     fi
 
 # So we can test the Docker image

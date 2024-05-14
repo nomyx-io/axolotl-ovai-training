@@ -3,12 +3,14 @@
 import os
 import signal
 import sys
+import weakref
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Optional, Tuple, Union
 
 import torch
 import transformers.modelcard
+from accelerate import Accelerator
 from accelerate.logging import get_logger
 from datasets import Dataset
 from peft import PeftModel
@@ -81,11 +83,13 @@ def train(
     if cfg.adapter:
         msg += " and peft_config..."
     LOG.debug(msg)
+    # we wait unitl the last possible moment to setup Accelerator
+    Accelerator()
     model, peft_config = load_model(cfg, tokenizer, inference=cli_args.inference)
     model.generation_config.do_sample = True
 
     model_ref = None
-    if cfg.rl:
+    if cfg.rl and cfg.rl != "orpo":
         if cfg.adapter and not cfg.rl_adapter_ref_model:
             # use built-in trl autounwrap
             LOG.debug("Passing model_ref: None to RL trainer")
@@ -124,14 +128,20 @@ def train(
     # In case we want to stop early with ctrl+c, this is a nice to have to save the pretrained model
     if cfg.local_rank == 0:
 
-        def terminate_handler(_, __, model):
-            if cfg.flash_optimum and BetterTransformer:
-                model = BetterTransformer.reverse(model)
-            model.save_pretrained(cfg.output_dir, safe_serialization=safe_serialization)
+        def terminate_handler(_, __, model_weakref):
+            if model_weakref() is not None:
+                _model = model_weakref()
+                if cfg.flash_optimum and BetterTransformer:
+                    _model = BetterTransformer.reverse(_model)
+                _model.save_pretrained(
+                    cfg.output_dir, safe_serialization=safe_serialization
+                )
             sys.exit(0)
 
+        _model_weakref = weakref.ref(model)
         signal.signal(
-            signal.SIGINT, lambda signum, frame: terminate_handler(signum, frame, model)
+            signal.SIGINT,
+            lambda signum, frame: terminate_handler(signum, frame, _model_weakref),
         )
 
     badge_markdown = """[<img src="https://raw.githubusercontent.com/OpenAccess-AI-Collective/axolotl/main/image/axolotl-badge-web.png" alt="Built with Axolotl" width="200" height="32"/>](https://github.com/OpenAccess-AI-Collective/axolotl)"""
