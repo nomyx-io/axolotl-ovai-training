@@ -1,5 +1,5 @@
-ARG BASE_TAG=main-base
-FROM winglian/axolotl-base:$BASE_TAG
+ARG BASE_TAG=main-py3.10-cu118-2.1.2
+FROM winglian/axolotl:$BASE_TAG
 
 ARG TORCH_CUDA_ARCH_LIST="7.0 7.5 8.0 8.6+PTX"
 ARG AXOLOTL_EXTRAS=""
@@ -13,17 +13,16 @@ ENV PYTORCH_VERSION=$PYTORCH_VERSION
 RUN apt-get update && \
     apt-get install -y --allow-change-held-packages vim curl nano libnccl2 libnccl-dev
 
-WORKDIR /workspace
-
-RUN git clone --depth=1 https://github.com/OpenAccess-AI-Collective/axolotl.git
-
 WORKDIR /workspace/axolotl
 
+# pip install torch==2.1.2 torchvision==0.16.2 --index-url https://download.pytorch.org/whl/cu118
+
 # If AXOLOTL_EXTRAS is set, append it in brackets
+RUN pip install causal_conv1d
 RUN if [ "$AXOLOTL_EXTRAS" != "" ] ; then \
-        pip install -e .[deepspeed,flash-attn,mamba-ssm,$AXOLOTL_EXTRAS] $AXOLOTL_ARGS; \
+        pip install -e .[deepspeed,flash-attn,mamba-ssm,galore,$AXOLOTL_EXTRAS] $AXOLOTL_ARGS; \
     else \
-        pip install -e .[deepspeed,flash-attn,mamba-ssm] $AXOLOTL_ARGS; \
+        pip install -e .[deepspeed,flash-attn,mamba-ssm,galore] $AXOLOTL_ARGS; \
     fi
 
 # So we can test the Docker image
